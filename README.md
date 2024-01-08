@@ -40,7 +40,13 @@ Then clone it to your local machine and run:
 ```console
 $ bundle
 ```
+### Running Local Server
 
+Run the following command in the root directory of the site:
+
+```console
+$ bundle exec jekyll s
+```
 ## Usage
 
 Please see the [theme's docs](https://github.com/cotes2020/jekyll-theme-chirpy#documentation).
