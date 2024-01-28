@@ -5,6 +5,8 @@ date: 2019-08-08 14:10:00 +0800
 categories: [Blogging, Tutorial]
 tags: [writing]
 render_with_liquid: false
+math: true
+
 ---
 
 This post will guide you how to write a post on _Chirpy_ theme. Even if you have previous experience with Jekyll, this article is worth reading, because many features require specific variables to be set.
@@ -356,3 +358,14 @@ Or adding `render_with_liquid: false` (Requires Jekyll 4.0 or higher) to the pos
 ## Learn More
 
 For more knowledge about Jekyll posts, visit the [Jekyll Docs: Posts](https://jekyllrb.com/docs/posts/).
+
+## Math 
+$$
+ax^2 + bx + c = 0
+$$
+
+<!-- When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are
+    \[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]
+     -->
+
+$\displaystyle \mathbf{sin}\left(x+\frac{\pi}{4}\right)+\mathbf{cos}\left(x-\frac{\pi}{3}\right)+\mathbf{ln}\left(\mathbf{e}^{x+1}+5x\right)=0$
