@@ -60,3 +60,4 @@ $$
 * [图解 Transformers](https://zhuanlan.zhihu.com/p/654051912)
 * [Dive deepl into Transformer](https://www.linkedin.com/pulse/deep-dive-positional-encodings-transformer-neural-network-ajay-taneja#:~:text=Positional%20Encodings%20can%20be%20looked,vector%20representation%20of%20the%20input.)
 * [why trigonometric function PE?](https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/)
+* [Positional Encoding](https://medium.com/@hunter-j-phillips/positional-encoding-7a93db4109e6)
