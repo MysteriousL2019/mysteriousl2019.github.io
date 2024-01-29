@@ -8,13 +8,13 @@ tags: [algorithm ]
 mermaid: true  #code模块
 comments: true
 mermaid: true
-
+img_path: /_posts/transformer/
 math: true
 # img_cdn: https://github.com/MysteriousL2019/mysteriousl2019.github.io/tree/master/assets/img/
 ---
 ## Serval Basic Units
 ### Bath Normalize & Layer Normalize
-<!-- * ![Alt text](image.png) -->
+* ![Alt text](image.png)
 * N for batchsize, C for seqlen, H, W for embedding dim
 * From Operation: BN operates on the same feature data for all data within the same batch; while LN operates on the same sample. 
 * Both BN and LN can better suppress the gradient disappearance and gradient explosion.BN is not suitable for sequence networks such as RNN, transformer, etc., and is not suitable for the case of indeterminate text length and small batchsize, it is suitable for networks such as CNN in CV.
