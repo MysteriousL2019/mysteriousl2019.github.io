@@ -4,7 +4,7 @@ author: Fangzheng
 date: 2023-6-10 17:19:00 +0800
 categories: [Data Science]
 tags: [machine learning]
-pin: false
+# pin: false
 mermaid: true  #code模块
 # comments: true
 math: true

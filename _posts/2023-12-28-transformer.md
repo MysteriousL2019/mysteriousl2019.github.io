@@ -2,7 +2,7 @@
 title: Transformer
 author: Fangzheng
 date: 2023-12-28 23:06:00 +0800
-categories: [Transformer AI]
+categories: [Transformer, Artificial Intelligence]
 tags: [algorithm ]
 # pin: true
 mermaid: true  #code模块
