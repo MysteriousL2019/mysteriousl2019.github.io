@@ -12,6 +12,15 @@ mermaid: true
 math: true
 # img_cdn: https://github.com/MysteriousL2019/mysteriousl2019.github.io/tree/master/assets/img/
 ---
+## Before Transformer
+* 深度学习做 NLP 的方法，基本上都是先将句子分词，然后每个词转化为对应的词向量序列。这样一来，每个句子都对应的是一个矩阵 $X = (x_1,x_2,...,x_t)$, 其中$x_i$都代表着第i个词的向量（行向量），纬度（d），$X\inR^{n*d}$问题就变成了编码这些序列了。
+* 第一个基本的思路是 RNN 层，RNN 的方案很简单，递归式进行：
+* $y_t = f(y_{t-1},x_t)$不管是已经被广泛使用的 LSTM、GRU 还是最近的 SRU，都并未脱离这个递归框架。RNN 结构本身比较简单，也很适合序列建模，但 RNN 的明显缺点之一就是无法并行，因此速度较慢，这是递归的天然缺陷。它本质是一个马尔科夫决策过程,RNN 无法很好地学习到全局的结构信息.
+* 第二个思路是 CNN 层，其实 CNN 的方案也是很自然的，窗口式遍历，比如尺寸为 3 的卷积，就是
+* $y_t = f(x_{t-1},x_t,x_{t+1})$
+* 在 FaceBook 的论文中，纯粹使用卷积也完成了 Seq2Seq 的学习，是卷积的一个精致且极致的使用案例，热衷卷积的读者必须得好好读读这篇文论。CNN 方便并行，而且容易捕捉到一些全局的结构信息。但是我认为 CNN 还是有一些问题，那就是需要叠一定量的层数之后才可以获取到较为全局的西信息。
+* Google 的大作 《Attention Is All You Need》 提供了第三个思路：**纯 Attention！单靠注意力就可以！**RNN 要逐步递归才能获得全局信息，因此一般要双向 RNN 才比较好；CNN事实上只能获取局部信息，是通过层叠来增大感受野；Attention 的思路最为粗暴，它一步到位获取了全局信息！它的解决方案是
+* $y_t = f(x_t,A,B)$ 其中 A, B 是另外一个序列（矩阵）。如果都取 A = B = X ，那么就称为Self Attention，它的意思是直接将 $x_t$与原来的每个词进行比较，最后算出$y_t$
 ## Serval Basic Units
 ### Bath Normalize & Layer Normalize
 * N 代表批量大小，C 代表序列长度，H、W 代表嵌入尺寸
@@ -61,3 +70,4 @@ $$
 * [Dive deepl into Transformer](https://www.linkedin.com/pulse/deep-dive-positional-encodings-transformer-neural-network-ajay-taneja#:~:text=Positional%20Encodings%20can%20be%20looked,vector%20representation%20of%20the%20input.)
 * [why trigonometric function PE?](https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/)
 * [Positional Encoding](https://medium.com/@hunter-j-phillips/positional-encoding-7a93db4109e6)
+* [大白话讲解 Transformer](https://zhuanlan.zhihu.com/p/264468193?utm_medium=social&utm_oi=1123713438710718464&utm_psn=1737408413846585345&utm_source=wechat_session)
