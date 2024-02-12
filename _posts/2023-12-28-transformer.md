@@ -62,18 +62,22 @@ math: true
 * 最好具有一定的值域范围，否则它比一般的字嵌入的数值要大，难免会抢了字嵌入的「风头」，对模型可能有一定的干扰；
 * 需要体现一定的相对次序关系，并且在一定范围内的编码差异不应该依赖于文本长度，具有一定translation invariant平移不变性。
 * *  假设有一个长度为的L输入序列，并且需要$POS^{th}$对象在此序列中的位置。位置编码由不同频率的正弦和余弦函数给出：
+* $$P(POS,2i) = sin(\frac{POS}{n^{\frac{2i}{d_{model}}}})$$
 * $$
-     P(POS,2i) = sin(\frac{POS}{n^{\frac{2i}{d_{model}}}})
-$$
-* $$
-     P(POS,2i+1) = cos(\frac{POS}{n^{\frac{2i}{d_{model}}}})
-$$
+     P(POS,2i+1) = cos(\frac{POS}{n^{\frac{2i}{d_{model}}}})$$
 * POS: 对象在输入序列中的位置, $0<=POS<\frac{L}{2}$
 * $d_{model}$: 输出嵌入空间的尺寸
 * n 用户定义的标量，由 Attention Is All You Need 的作者设置为 10,000。
 * i 用于映射到列索引 $0<=i<\frac{d_{model}}{2}$ 具有正弦和余弦函数的i单个映射值.
 * P(k,j) 位置函数，用于将输入序列中的位置 k 映射到位置矩阵的索引 (k,j) 
 
+### 总结
+* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理
+* Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$
+* Decoder 过程 
+     * AT auto-regression: 由于musk，不可以并行。类似英文汉译英的时候读入一整句话，翻译却是一点点写出来的
+          * CrossAttention: from BEGIN(word2vec + PE)作为Query, 与Encoder 中的Key, Value 做Multi-head attention, 
+     * NAT 非auto-regression: 可以并行化
 <!-- * ![Alt text](image-2.png) -->
 <!-- https://miro.medium.com/v2/resize:fit:4800/format:webp/1*SMXg-0Yd-x-6g818nUfsUw.png -->
 ### Reference
