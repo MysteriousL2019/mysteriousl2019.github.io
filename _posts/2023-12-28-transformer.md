@@ -75,6 +75,19 @@ math: true
 * Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。
      * 比如 向量 $a*b=|a||b|, a*b=-|a||b|, $向量乘法表示相似度
 * Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$, 其中QKV都是原始的Word Embedding分别经过三个不同的全联接层得到的。
+     * 为什么除以$\sqrt d_k$因为$d_k$过大时候内积也会增加，softmax函数的梯度很小
+     * 先解释：为什么当$d_k$较大时，向量内积容易取很大的值（借用原论文的注释）
+     * 假设 query 和 key 向量中的元素都是相互独立的均值为 0，方差为 1 的随机变量，那么这两个向量的内积$q^Tk=\sum_{i=1}^{d_k}q_ik_i$的均值是0，方差是$d_k$
+     * Prove: 
+          * $E[q_i]=E[k_i]=0$, $Var(q_i)=Var(k_i)=1$
+          * 由于$q_i,k_i独立,Cov(q_i,k_i)=E[(q_i-E[q_i])(k_i-E[k_i])]=E[q_ik_i]-E[q_i]E[k_i]=0 ==> E[q_ik_i]=E[q_i]E[k_i]=0$
+          * $Var(q_ik_i)=E[(q_ik_i)^2]-(E[q_ik_i])^2=E[q_i^2]E[k_i^2]-(E[q_i]E[k_i])^2=Var(q_i)Var(k_i)=1$ Since $Var(X+Y)=Var(X)+Var(Y)+2Cov(X,Y)=Var(X)+Var(Y) $for two independent variables
+          * $E[q^Tk]=\sum_{i=1}^{d_k}=0$
+          * $Var(q^Tk)=\sum_{i=1}^{d_k}Var(q_ik_i)=d_k$
+          * 所以$d_k$较大时，$q^Tk$的方差较大，不同的 key 与同一个 query 算出的对齐分数可能会相差很大，有的远大于 0，有的则远小于 0.
+     * 因此，向量内积的值（对齐分数）较大时==> $d_k$较大，方差较大，很多值落在softmax横坐标较大位置，softmax的函数梯度很小
+     * 此时softmax函数梯度过低（趋于零），使得模型误差反向传播（back-propagation）经过 s o f t m a x softmaxsoftmax 函数后无法继续传播到模型前面部分的参数上，造成这些参数无法得到更新，最终影响模型的训练效率。
+     * 因此score = $\frac{q^Tk}{\sqrt d_k}$, 由$Var(kx)=k^2Var(x)得到$此时的score是1，这样就消除了Var随着$d_k$增大而变动
 * Decoder 过程 
      * AT auto-regression: 由于musk，不可以并行。类似英文汉译英的时候读入一整句话，翻译却是一点点写出来的
           * CrossAttention: from BEGIN(word2vec + PE)经过全联接层后，输出作为Query, 与Encoder 中的Key, Value 做Multi-head attention
