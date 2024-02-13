@@ -23,12 +23,15 @@ math: true
 * $y_t = f(x_t,A,B)$ 其中 A, B 是另外一个序列（矩阵）。如果都取 A = B = X ，那么就称为Self Attention，它的意思是直接将 $x_t$与原来的每个词进行比较，最后算出$y_t$
 ## Serval Basic Units
 ### Bath Normalize & Layer Normalize
-* N 代表批量大小，C 代表序列长度，H、W 代表嵌入尺寸
+* 加速网络收敛速度，提升训练稳定性，Batchnorm本质上是解决反向传播过程中的梯度问题。batchnorm全名是batch normalization，简称BN，即批规范化，通过规范化操作将输出信号x规范化到均值为0，方差为1保证网络的稳定性。
+* $\hat x_i = \frac{x_i-\mu_b}{\sigma^2_b+\varepsilon }$
+* 此部分大概讲一下batchnorm解决梯度的问题上。具体来说就是反向传播中，经过每一层的梯度会乘以该层的权重，举个简单例子： 正向传播中
+     * $f_3=f_2(w^Tx+b)$, 那么反向传播中,$\frac{\partial f_2}{\partial x}=\frac{\partial f_2}{\partial f_1}w $
+     * 反向传播式子中有w的存在，所以的大小影响了梯度的消失和爆炸，batchnorm就是通过对每一层的输出做scale和shift的方法，通过一定的规范化手段，把每层神经网络任意神经元这个输入值的分布强行拉回到接近均值为0方差为1的标准正太分布，即严重偏离的分布强制拉回比较标准的分布，这样使得激活输入值落在非线性函数对输入比较敏感的区域，这样输入的小变化就会导致损失函数较大的变化，使得让梯度变大，避免梯度消失问题产生，而且梯度变大意味着学习收敛速度快，能大大加快训练速度。
 * 来自操作： BN 对同一批次中的所有数据的同一特征数据进行操作；而 LN 对同一样本进行操作。
 * BN 不适合 RNN、变换器等序列网络，也不适合文本长度不确定和批量较小的情况，它适合 CV 中的 CNN 等网络。
 * 而 LN 适用于 NLP 中的 RNN 和变换器等网络，因为序列的长度可能不一致。
 <!-- * ![Alt text](image.png) -->
-
 ### Code 
 ```
      torch.nn.BatchNorm1d(num_features, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -40,6 +43,7 @@ math: true
      affine: boolean value, when set to true, to add the layer can be learned affine transformation parameters.
      track_running_stats: boolean, when set to true, records the mean and variance during training;
 ```
+
 ### Why Normalization
 * 在神经网络中，数据的分布会对训练产生影响。例如，如果一个神经元 x 的值为 1，而 Weights 的初始值为 0.1，那么下一层神经元将计算 Wx = 0.1；或者如果 x = 20，那么 Wx 的值将为 2。我们还没发现问题，但当我们添加一层激励来激活 Wx 的这个值时，问题就出现了。如果我们使用 tanh 这样的激励函数，Wx 的激活值就会变成 ~0.1 和 ~1，而接近 1 的部分已经处于激励函数的饱和阶段，也就是说，如果 x 无论扩大多少，tanh 激励函数的输出仍然接近 1。换句话说，神经网络不再对初始阶段的大范围 x 特征敏感。换句话说，神经网络不再对初始阶段那些大范围的 x 特征敏感。这就糟糕了，想象一下，拍打自己和撞击自己的感觉没有任何区别，这就证明我的感觉系统失灵了。当然，我们可以使用前面提到的归一化预处理，让输入 x 范围不要太大，这样输入值就能通过激励函数的敏感部分。但这种不敏感问题不仅出现在神经网络的输入层，也会出现在隐藏层。但是，当 x 被隐藏层取代后，我们还能像以前那样对隐藏层的输入进行归一化处理吗？答案是肯定的，因为大人物们已经发明了一种叫做批量归一化的技术，可以解决这种情况。
 ### BN Add Location
@@ -50,6 +54,10 @@ math: true
 ### Flaws of BN
 * BN是按照样本数计算归一化统计量的，当样本数很少时，比如说只有4个。这四个样本的均值和方差便不能反映全局的统计分布息，所以基于少量样本的BN的效果会变得很差。在一些场景中，比如说硬件资源受限，在线学习等场景，BN是非常不适用的。
 <!-- * ![Alt text](image-1.png) -->
+## Resnet
+*  x --> F(x) --> x+F(x)
+* 所以结果来看 $\frac{\partial loss}{\partial x_l} =\frac{\partial loss}{\partial x_L}*\frac{\partial x_L}{\partial x_l}=\frac{\partial loss}{\partial x_L}(1+\frac{\partial \sum_{i=l}^{L-1}F(x_i,W_i)}{\partial x_L} )   $
+* 式子的第一个因子 $\frac{\partial loss}{\partial x_L} $ 表示的损失函数到达 L 的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有weights的层，梯度不是直接传递过来的。残差梯度不会那么巧全为-1，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。
 ## Positional Encoding
 * 假设有一个长度为的L输入序列，token在句子中的位置计作POS，那么token的位置编码PE = POS = 0, 1, 2, ..., T-1。显然有一个问题，若很长序列为（10,000）。那么左右一个token的POS值将会很大，导致:
      * 和word embedding向量做加法之后将会使得网络把后面的编码较大的token当作主要信息（这是没有道理的）
@@ -99,3 +107,4 @@ math: true
 * [why trigonometric function PE?](https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/)
 * [Positional Encoding](https://medium.com/@hunter-j-phillips/positional-encoding-7a93db4109e6)
 * [大白话讲解 Transformer](https://zhuanlan.zhihu.com/p/264468193?utm_medium=social&utm_oi=1123713438710718464&utm_psn=1737408413846585345&utm_source=wechat_session)
+* [从反向传播推导到梯度消失and爆炸的原因及解决](https://zhuanlan.zhihu.com/p/76772734)
