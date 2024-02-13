@@ -80,7 +80,6 @@ math: true
           * CrossAttention: from BEGIN(word2vec + PE)经过全联接层后，输出作为Query, 与Encoder 中的Key, Value 做Multi-head attention
           * 因此如果是AT的话，只有encoder可以并行。
      * NAT 非auto-regression: 可以并行化。
-     ![Alt text](image-1.png)
 ### Reference
 * [图解 Transformers](https://zhuanlan.zhihu.com/p/654051912)
 * [Dive deepl into Transformer](https://www.linkedin.com/pulse/deep-dive-positional-encodings-transformer-neural-network-ajay-taneja#:~:text=Positional%20Encodings%20can%20be%20looked,vector%20representation%20of%20the%20input.)
