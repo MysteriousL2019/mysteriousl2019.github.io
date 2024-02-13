@@ -72,14 +72,15 @@ math: true
 * P(k,j) 位置函数，用于将输入序列中的位置 k 映射到位置矩阵的索引 (k,j) 
 
 ### 总结
-* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理
-* Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$
+* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。
+     * 比如 向量 $a*b=|a||b|, a*b=-|a||b|, $向量乘法表示相似度
+* Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$, 其中QKV都是原始的Word Embedding分别经过三个不同的全联接层得到的。
 * Decoder 过程 
      * AT auto-regression: 由于musk，不可以并行。类似英文汉译英的时候读入一整句话，翻译却是一点点写出来的
-          * CrossAttention: from BEGIN(word2vec + PE)作为Query, 与Encoder 中的Key, Value 做Multi-head attention, 
-     * NAT 非auto-regression: 可以并行化
-<!-- * ![Alt text](image-2.png) -->
-<!-- https://miro.medium.com/v2/resize:fit:4800/format:webp/1*SMXg-0Yd-x-6g818nUfsUw.png -->
+          * CrossAttention: from BEGIN(word2vec + PE)经过全联接层后，输出作为Query, 与Encoder 中的Key, Value 做Multi-head attention
+          * 因此如果是AT的话，只有encoder可以并行。
+     * NAT 非auto-regression: 可以并行化。
+     ![Alt text](image-1.png)
 ### Reference
 * [图解 Transformers](https://zhuanlan.zhihu.com/p/654051912)
 * [Dive deepl into Transformer](https://www.linkedin.com/pulse/deep-dive-positional-encodings-transformer-neural-network-ajay-taneja#:~:text=Positional%20Encodings%20can%20be%20looked,vector%20representation%20of%20the%20input.)
