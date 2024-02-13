@@ -13,10 +13,10 @@ math: true
 # img_cdn: https://github.com/MysteriousL2019/mysteriousl2019.github.io/tree/master/assets/img/
 ---
 ### Language Usage for NLP task
-* Speech Recognition 语音识别 $P("We built this city on rock and roll") > P("We built this city on sausage rolls")$
-* Spelling correction 拼写更正 $P("... has no mistakes") > P("... has no mistaeks")$
-* Grammar correction 语法更正 $P("... has imporoved") > P("... has improve")$ 
-* Machine Translation 机器翻译 $P("I went home") > P("I went to home")$
+* Speech Recognition 语音识别 P("We built this city on rock and roll") > P("We built this city on sausage rolls")
+* Spelling correction 拼写更正 P("... has no mistakes") > P("... has no mistaeks")
+* Grammar correction 语法更正 P("... has imporoved") > P("... has improve")
+* Machine Translation 机器翻译 P("I went home") > P("I went to home")
 
 ### Large language model
 * GPT，全称Generative Pre-training Transformer，是OpenAI开发的一种基于Transformer的大规模自然语言生成模型。GPT模型采用了自监督学习的方式，首先在大量的无标签数据上进行预训练，然后在特定任务的数据上进行微调。
