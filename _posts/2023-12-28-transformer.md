@@ -43,6 +43,21 @@ math: true
      affine: boolean value, when set to true, to add the layer can be learned affine transformation parameters.
      track_running_stats: boolean, when set to true, records the mean and variance during training;
 ```
+### Gradient Vanishing & Gradient Explode
+* Gradient Vanishing: 假设（假设每一层只有一个神经元且对于每一层 $y_i=\sigma (z_i)=\sigma(w_ix_i+b_i)$，则通过链式法则知，网络越深每一层网络求导后都会加上一个系数 $w_i$ 以及每次 $\sigma ^{'}(z_i)$ ，sigmoid函数求导后最大最大也只能是0.25。再来看W，一般我们初始化权重参数W时，通常都小于1，用的最多的是0，1正态分布。
+     * 所以 $|\sigma^{'}(z)W|<=0.25$ 多个小于1的数连乘之后，那将会越来越小，导致靠近输入层的层的权重的偏导几乎为0，也就是说几乎不更新，这就是梯度消失的根本原因。
+     * 再来看看梯度爆炸的原因，也就是说如果 $|\sigma^{'}(z)W|>=1$ ，则连乘下来就会导致梯度过大，导致梯度更新幅度特别大，可能会溢出，导致模型无法收敛。sigmoid的函数是不可能大于1了，那只能是w过大，故初始权重过大，会导致梯度爆炸。
+     * 其实梯度爆炸和梯度消失问题都是因为网络太深，网络权值更新不稳定造成的，本质上是因为梯度反向传播中的连乘效应。
+     ### How to deal with Gradient Vanishing & Gradient Explode
+     * 1. pre-trained & Fine-tuning: in Deep Belief Networks firstly used
+     * 2. 梯度剪切、正则： 梯度剪切这个方案主要是针对梯度爆炸提出的，其思想是设置一个梯度剪切阈值，然后更新梯度的时候，如果梯度超过这个阈值，那么就将其强制限制在这个范围之内。这可以防止梯度爆炸。正则化是通过对网络权重做正则限制过拟合，仔细看正则项在损失函数的形式： $LOSS=(y-W^Tx)^2+\alpha ||W||^2$ 事实上，在深度神经网络中，往往是梯度消失出现的更多一些
+     * 3. Activation Function: (idea 最好是求导后值都等于一，这样网络深度加大后求导的值仅仅是连乘1，那么就不存在梯度消失爆炸的问题了)
+          * relu:(解决了梯度消失、爆炸的问题,计算方便；计算速度快,加速了网络的训练； 但由于负数部分恒为0，会导致一些神经元无法激活（可通过设置小学习率部分解决；输出不是以0为中心的——会导致数据分布改变)
+     * 4. Batchnorm(见上文)
+     * 5. Resnet module(见下文)
+
+
+
 
 ### Why Normalization
 * 在神经网络中，数据的分布会对训练产生影响。例如，如果一个神经元 x 的值为 1，而 Weights 的初始值为 0.1，那么下一层神经元将计算 Wx = 0.1；或者如果 x = 20，那么 Wx 的值将为 2。我们还没发现问题，但当我们添加一层激励来激活 Wx 的这个值时，问题就出现了。如果我们使用 tanh 这样的激励函数，Wx 的激活值就会变成 ~0.1 和 ~1，而接近 1 的部分已经处于激励函数的饱和阶段，也就是说，如果 x 无论扩大多少，tanh 激励函数的输出仍然接近 1。换句话说，神经网络不再对初始阶段的大范围 x 特征敏感。换句话说，神经网络不再对初始阶段那些大范围的 x 特征敏感。这就糟糕了，想象一下，拍打自己和撞击自己的感觉没有任何区别，这就证明我的感觉系统失灵了。当然，我们可以使用前面提到的归一化预处理，让输入 x 范围不要太大，这样输入值就能通过激励函数的敏感部分。但这种不敏感问题不仅出现在神经网络的输入层，也会出现在隐藏层。但是，当 x 被隐藏层取代后，我们还能像以前那样对隐藏层的输入进行归一化处理吗？答案是肯定的，因为大人物们已经发明了一种叫做批量归一化的技术，可以解决这种情况。
@@ -58,6 +73,9 @@ math: true
 *  x --> F(x) --> x+F(x)
 * 所以结果来看 $\frac{\partial loss}{\partial x_l} =\frac{\partial loss}{\partial x_L}*\frac{\partial x_L}{\partial x_l}=\frac{\partial loss}{\partial x_L}(1+\frac{\partial \sum_{i=l}^{L-1}F(x_i,W_i)}{\partial x_L} )   $
 * 式子的第一个因子 $\frac{\partial loss}{\partial x_L} $ 表示的损失函数到达 L 的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有weights的层，梯度不是直接传递过来的。残差梯度不会那么巧全为-1，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。
+
+
+
 ## Positional Encoding
 * 假设有一个长度为的L输入序列，token在句子中的位置计作POS，那么token的位置编码PE = POS = 0, 1, 2, ..., T-1。显然有一个问题，若很长序列为（10,000）。那么左右一个token的POS值将会很大，导致:
      * 和word embedding向量做加法之后将会使得网络把后面的编码较大的token当作主要信息（这是没有道理的）
@@ -177,3 +195,4 @@ math: true
 * [Positional Encoding](https://medium.com/@hunter-j-phillips/positional-encoding-7a93db4109e6)
 * [大白话讲解 Transformer](https://zhuanlan.zhihu.com/p/264468193?utm_medium=social&utm_oi=1123713438710718464&utm_psn=1737408413846585345&utm_source=wechat_session)
 * [从反向传播推导到梯度消失and爆炸的原因及解决](https://zhuanlan.zhihu.com/p/76772734)
+* [BERT](https://zhuanlan.zhihu.com/p/403495863)
