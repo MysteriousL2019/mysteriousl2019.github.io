@@ -187,7 +187,10 @@ math: true
           * BERT对生成式任务和长序列建模支持不好。
 
 ## GPT(Generative pre-trained transformer)
-
+* text to text: GPT 利用decoder是接收到问题之后。根据问题生成第一个字的概率分布，sample最高概率的之后拿取第一个字，根据第一个字生成第二个字的概率分布....
+* 但是图像不可以这样
+     * 并且256*256的图片切割成序列输入，再像素化输出的话速度很慢
+     * 文字基本由正确答案的，但是生成图片的时候，如：”画一只正在奔跑的狗“，如果一个pixel by pixel 生成的话 难免会出现错乱。所以伴随文字会有一个normal distribution 一起输入（所有生成模型需要攻克这个问题VAE,Diffusion model, Flow-based Generative Model, GAN）
 ### Reference
 * [图解 Transformers](https://zhuanlan.zhihu.com/p/654051912)
 * [Dive deepl into Transformer](https://www.linkedin.com/pulse/deep-dive-positional-encodings-transformer-neural-network-ajay-taneja#:~:text=Positional%20Encodings%20can%20be%20looked,vector%20representation%20of%20the%20input.)
