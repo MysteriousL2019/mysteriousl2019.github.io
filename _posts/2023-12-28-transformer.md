@@ -96,17 +96,21 @@ math: true
 * n 用户定义的标量，由 Attention Is All You Need 的作者设置为 10,000。
 * i 用于映射到列索引 $0<=i<\frac{d_{model}}{2}$ 具有正弦和余弦函数的i单个映射值.
 * P(k,j) 位置函数，用于将输入序列中的位置 k 映射到位置矩阵的索引 (k,j) 
-
+### Transformer 参数量计算
+* 我们来分析下 Transformer 模型的参数量，先假设序列中每个token 的向量维度 $d_{model}=D$,表大小是V,Multi-head个数是$H$,每个 head 中向量维度 $d_q=d_k=d_v=\frac{D}{H}$
+* $softmax$前的Linear层不属于 Encoder 和 Decoder，它的参数量和层数、维度相关，并且线性层的参数量很容易计算，这里就忽略掉。我们重点看 Encoder 和 Decoder 的参数量。
+* 先看下 Positional Encoding 和 Embedding，由于前者使用的是三角函数直接计算得到的，参数量为 0，后者出现在 Transformer 中的 3 个位置（Input Embedding、Output Embedding、Pre-softmax），但是参数共享，所以只有一份参数，也就是 $VD$
+* Transformer 中有三处地方用到了 self-attention: Encoder 中的Multi-Head Attention、Decoder 中的Masked Multi-Head Attention、Decoder 中的Multi-Head Attention(Cross-Attention)。其实三者的模型结构完全相同，差别仅在于 $Q(query)$
 ### 总结
-* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。
-     * 比如 向量 $a*b=|a||b|, a*b=-|a||b|, $向量乘法表示相似度
+* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。 比如 向量 $a*b=|a||b|, a*b=-|a||b|, $向量乘法表示相似度
 * Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$, 其中QKV都是原始的Word Embedding分别经过三个不同的全联接层得到的。
      * 为什么除以$\sqrt d_k$因为$d_k$过大时候内积也会增加，softmax函数的梯度很小
      * 先解释：为什么当$d_k$较大时，向量内积容易取很大的值（借用原论文的注释）
      * 假设 query 和 key 向量中的元素都是相互独立的均值为 0，方差为 1 的随机变量，那么这两个向量的内积$q^Tk=\sum_{i=1}^{d_k}q_ik_i$的均值是0，方差是$d_k$
      * Prove: 
           * $E[q_i]=E[k_i]=0$, $Var(q_i)=Var(k_i)=1$
-          * 由于$q_i,k_i独立,Cov(q_i,k_i)=E[(q_i-E[q_i])(k_i-E[k_i])]=E[q_ik_i]-E[q_i]E[k_i]=0 ==> E[q_ik_i]=E[q_i]E[k_i]=0$
+          * 由于$q_i,k_i$独立,$Cov(q_i,k_i)=E[(q_i-E[q_i])(k_i-E[k_i])]=E[q_ik_i]-E[q_i]E[k_i]=0 $
+          * ==> $E[q_ik_i]=E[q_i]E[k_i]=0$
           * $Var(q_ik_i)=E[(q_ik_i)^2]-(E[q_ik_i])^2=E[q_i^2]E[k_i^2]-(E[q_i]E[k_i])^2=Var(q_i)Var(k_i)=1$ Since $Var(X+Y)=Var(X)+Var(Y)+2Cov(X,Y)=Var(X)+Var(Y) $for two independent variables
           * $E[q^Tk]=\sum_{i=1}^{d_k}=0$
           * $Var(q^Tk)=\sum_{i=1}^{d_k}Var(q_ik_i)=d_k$
@@ -151,7 +155,7 @@ softmax([1,2,3])  # [0.0900, 0.2447, 0.6652]
 * 可以看到，上述计算过程时间复杂度是线性的$O(N)$, 因为$QK^T\in R^{N*N}$,softmax是按照行计算的，所以$softmax(R^{N*N})$的时间复杂度是$O(N^2)$
 * 假设 $S=softmax(\frac{QK^T}{\sqrt d})\in R^{N*N}, V\in R^{N*d}$, 则SV的时间复杂度是 $O(N^2d)$
 * 因此整个attention时间复杂度是 $O(N^2d+N^2+N^2+N^2d)=O(N^2d)$ 此时如果把向量维度d看作常数，则可以说 self-attention 的时间复杂度是序列长度的平方。
-* 至于空间复杂度 存储 $QK^T$,$\frac{QK^T}{\sqrt d}$, 还是softmax(S),都是 $O(N^2)$, 最后存储 $SV\in R^{N*d}$的空间复杂度是 $O(Nd)$这样，整个Attention 空间复杂度可以看作 $O(N^2+Nd)$如果把向量维度d看作常数，则可以说 self-attention 的空间复杂度是序列长度的平方。
+* 至于空间复杂度 存储 $QK^T$,$\frac{QK^T}{\sqrt d}$, 还是softmax(S),都是 $O(N^2)$, 最后存储 $SV\in R^{N*d}$的空间复杂度是 $O(Nd)$这样，整个Attention 空间复杂度可以看作 $O(N^2+Nd)$如果把向量维度d看作常数，则可以说 self-attention 的空间复杂度是序列长度的平方。P.S.(如果是Multi-head self-attention, 空间复杂度需要乘上head的个数)
 ## Transformer变种
 ### VIT(Vision Transformer)
 * 处理数据的模式：
