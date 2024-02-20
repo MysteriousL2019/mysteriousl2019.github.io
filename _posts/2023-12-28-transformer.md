@@ -119,6 +119,39 @@ math: true
           * CrossAttention: from BEGIN(word2vec + PE)经过全联接层后，输出作为Query, 与Encoder 中的Key, Value 做Multi-head attention
           * 因此如果是AT的话，只有encoder可以并行。
      * NAT 非auto-regression: 可以并行化。
+### Self-Attention 时间和空间复杂度
+* 在讨论 self-attention 的时间和空间复杂度时，都会提到是 $O(N^2)$, $N$ 为序列长度
+* 其实略高在 [AAAI 2021的Best paper, Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://ojs.aaai.org/index.php/AAAI/article/view/17325) 中这个问题得到解决
+* 我们来看下 scaled dot-product attention的时间和空间复杂度
+* $$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d}})V $$
+* 我们把上面的计算过程拆分 , $S=QK^T$, $S=\frac{S}{\sqrt d}$, $S=softmax(S)$ , $SV$ 只要我们分析出每个计算的复杂度，就可以得到整体计算的复杂度。
+* $QK^T$ , where $Q\in R^{N*d}$, $K\in R^{N*d}$, 矩阵乘法的朴素算法时间复杂度是 $O(NdN)=O(N^2d)$, 至于空间复杂度，只看存储$QK^T$ 计算结果，复杂度是 $O(N^2)$, 但是也不要觉得这个数字很大，如果, $N<d$.其实存储 $Q$和 $V$ 比 $QV^T$更占显(内)存.除非是序列很长$N>>d$空间复杂度 $O(N^2)$才是瓶颈。
+* 简单回顾下矩阵乘法 $C=AB, A\in R^{m*n}, B\in R^{n*l},C\in R^{m*l}$, 显而易见，3 个 for loop, 因此矩阵乘法时间复杂度 $O(mnl)$
+'''python
+C = np.zeros((m, l))
+
+for i in range(m):
+  for j in range(l):
+    for k in range(n):
+      C[i][j] += A[m][k] * B[k][n]
+'''
+* 由于 $QK^T\in R^{N*N}$, 因此 $\frac{QK^T}{\sqrt d}$时间复杂度是 $O(N^2)$ 
+* 至于softmax 时间复杂度， 假设x是一维向量，
+* $$softmax(x)=\frac{e^{x_i}}{\sum_i e^{x_i}}$$
+'''python
+def softmax(x):
+    m_val = max(x)
+    x = [i-m_val for i in x]
+    x = [math.exp(i) for i in x]
+    deno = sum(x)
+    return [item / deno for item in x]
+
+softmax([1,2,3])  # [0.0900, 0.2447, 0.6652]
+'''
+* 可以看到，上述计算过程时间复杂度是线性的$O(N)$, 因为$QK^T\in R^{N*N}$,softmax是按照行计算的，所以$softmax(R^{N*N})$的时间复杂度是$O(N^2)$
+* 假设 $S=softmax(\frac{QK^T}{\sqrt d})\in R^{N*N}, V\in R^{N*d}$, 则SV的时间复杂度是 $O(N^2d)$
+* 因此整个attention时间复杂度是 $O(N^2d+N^2+N^2+N^2d)=O(N^2d)$ 此时如果把向量维度d看作常数，则可以说 self-attention 的时间复杂度是序列长度的平方。
+* 至于空间复杂度 存储 $QK^T$,$\frac{QK^T}{\sqrt d}$, 还是softmax(S),都是 $O(N^2)$, 最后存储 $SV\in R^{N*d}$的空间复杂度是 $O(Nd)$这样，整个Attention 空间复杂度可以看作 $O(N^2+Nd)$如果把向量维度d看作常数，则可以说 self-attention 的空间复杂度是序列长度的平方。
 ## Transformer变种
 ### VIT(Vision Transformer)
 * 处理数据的模式：
