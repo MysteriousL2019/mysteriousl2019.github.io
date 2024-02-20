@@ -102,7 +102,7 @@ math: true
 * 先看下 Positional Encoding 和 Embedding，由于前者使用的是三角函数直接计算得到的，参数量为 0，后者出现在 Transformer 中的 3 个位置（Input Embedding、Output Embedding、Pre-softmax），但是参数共享，所以只有一份参数，也就是 $VD$
 * Transformer 中有三处地方用到了 self-attention: Encoder 中的Multi-Head Attention、Decoder 中的Masked Multi-Head Attention、Decoder 中的Multi-Head Attention(Cross-Attention)。其实三者的模型结构完全相同，差别仅在于 $Q(query)$
 ### 总结
-* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。 比如 向量 $a*b=|a||b|, a*b=-|a||b|, $向量乘法表示相似度
+* Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。 比如 向量 $a*b=ab, a*b=-ab, $向量乘法表示相似度
 * Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$, 其中QKV都是原始的Word Embedding分别经过三个不同的全联接层得到的。
      * 为什么除以$\sqrt d_k$因为$d_k$过大时候内积也会增加，softmax函数的梯度很小
      * 先解释：为什么当$d_k$较大时，向量内积容易取很大的值（借用原论文的注释）
