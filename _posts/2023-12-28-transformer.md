@@ -100,7 +100,15 @@ math: true
 * 我们来分析下 Transformer 模型的参数量，先假设序列中每个token 的向量维度 $d_{model}=D$,表大小是V,Multi-head个数是$H$,每个 head 中向量维度 $d_q=d_k=d_v=\frac{D}{H}$
 * $softmax$前的Linear层不属于 Encoder 和 Decoder，它的参数量和层数、维度相关，并且线性层的参数量很容易计算，这里就忽略掉。我们重点看 Encoder 和 Decoder 的参数量。
 * 先看下 Positional Encoding 和 Embedding，由于前者使用的是三角函数直接计算得到的，参数量为 0，后者出现在 Transformer 中的 3 个位置（Input Embedding、Output Embedding、Pre-softmax），但是参数共享，所以只有一份参数，也就是 $VD$
-* Transformer 中有三处地方用到了 self-attention: Encoder 中的Multi-Head Attention、Decoder 中的Masked Multi-Head Attention、Decoder 中的Multi-Head Attention(Cross-Attention)。其实三者的模型结构完全相同，差别仅在于 $Q(query)$
+* Transformer 中有三处地方用到了 self-attention: Encoder 中的Multi-Head Attention、Decoder 中的Masked Multi-Head Attention、Decoder 中的Multi-Head Attention(Cross-Attention)。其实三者的模型结构完全相同，差别仅在于 $Q(query), K(Key), V(Value)$来自同一个序列还是两个序列，是否用 mask。因此参数量计算方法相同，并且向量维度都是$d_{model}，三者的参数量也相同。
+* 同样的，Encoder 和 Decoder 中的FFNN 结构相同，参数量也相同。
+* 分别看下 self-attention 和 FFNN 的参数量，先来看 self-attention，假设序列 $X\in R^{L*d_{model}}$其中L是序列长度，Q=K=V=X,回顾下scaled dot-product attention公式：$$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d}})V $$
+* 再回顾下论文中给出的 MHSA的计算公式，:$$MultiHead(Q,K,V)=Concat(head_1,head_2,...,head_H)W^O$$,$$head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$$
+* 其中 $W_i^Q\in R^{d_{model}d_q},W_i^K\in R^{d_{model}d_k},W_i^V\in R^{d_{model}d_v}$
+* 现在来计算下参数量: $$H(W_i^Q+W_i^K+W_i^V)+W^O$$ , $$=H(3d_{model}d_k)+d^2_{model}$$, $$=3d_{model}(Hd_k)+d^2_{model}$$,$$=4d^2_{model}$$
+* 具体实现的时候是，创建 $W^Q\in R^{d_{model}d_{model}}$... 这样可以清楚看到参数量是 $ 4d_{model}^2$
+* 再来看下 FFNN，它对序列$X$中每个元素向量进行转换，$$FFNN(x)=max(0,xW_1+b_1)W_2+b_2$$
+
 ### 总结
 * Transformer中涉及繁琐的矩阵计算，本质是用矩阵乘法衡量特征向量之间的相似度，理解了计算过程有助于加深理解网络设计原理。 比如 向量 $a*b=ab, a*b=-ab, $向量乘法表示相似度
 * Encoder 过程$(word2vec + PE)* \frac {softmax(Q,K)*(V)}{\sqrt d_k}$, 其中QKV都是原始的Word Embedding分别经过三个不同的全联接层得到的。
@@ -236,3 +244,4 @@ softmax([1,2,3])  # [0.0900, 0.2447, 0.6652]
 * [大白话讲解 Transformer](https://zhuanlan.zhihu.com/p/264468193?utm_medium=social&utm_oi=1123713438710718464&utm_psn=1737408413846585345&utm_source=wechat_session)
 * [从反向传播推导到梯度消失and爆炸的原因及解决](https://zhuanlan.zhihu.com/p/76772734)
 * [BERT](https://zhuanlan.zhihu.com/p/403495863)
+* [参数量和时间空间复杂度](https://zhuanlan.zhihu.com/p/661804092)
