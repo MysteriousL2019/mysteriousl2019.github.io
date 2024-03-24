@@ -272,3 +272,4 @@ We ask: what makes masked autoencoding different between vision and language ?
 * [BERT](https://zhuanlan.zhihu.com/p/403495863)
 * [参数量和时间空间复杂度](https://zhuanlan.zhihu.com/p/661804092)
 * [PE](https://blog.csdn.net/weixin_44012382/article/details/113059423)
+* [Lost of Gradient RNN vs DNN](https://zhuanlan.zhihu.com/p/673787298)
