@@ -18,6 +18,49 @@ math: true
 * Grammar correction 语法更正 P("... has imporoved") > P("... has improve")
 * Machine Translation 机器翻译 P("I went home") > P("I went to home")
 
+### Embedding and Word Embedding
+* 现有的机器学习方法往往无法直接处理文本数据，因此需要找到合适的方法，将文本数据转换为数值型数据，由此引出了Word Embedding（词嵌入）的概念。
+* 词嵌入是自然语言处理（NLP）中语言模型与表征学习技术的统称，它是NLP里的早期预训练技术。它是指把一个维数为所有词的数量的高维空间嵌入到一个维数低得多的连续向量空间中，每个单词或词组被映射为实数域上的向量，这也是分布式表示：向量的每一维度都没有实际意义，而整体代表一个具体概念。
+* 分布式表示相较于传统的独热编码（one-hot）表示具备更强的表示能力，而独热编码存在维度灾难和语义鸿沟（不能进行相似度计算）等问题。传统的分布式表示方法，如矩阵分解（SVD/LSA）、LDA等均是根据全局语料进行训练，是机器学习时代的产物。
+* Word Embedding的输入是原始文本中的一组不重叠的词汇，假设有句子：apple on a apple tree。那么为了便于处理，我们可以将这些词汇放置到一个dictionary里，例如：[“apple”, “on”, “a”, “tree”]，这个dictionary就可以看作是Word Embedding的一个输入。
+* Word Embedding的输出就是每个word的向量表示。对于上文中的原始输入，假设使用最简单的one hot编码方式，那么每个word都对应了一种数值表示。例如，apple对应的vector就是[1, 0, 0, 0]，a对应的vector就是[0, 0, 1, 0]，各种机器学习应用可以基于这种word的数值表示来构建各自的模型。当然，这是一种最简单的映射方法，但却足以阐述Word Embedding的意义。
+* 文本表示的类型：
+    * 基于one-hot、tf-idf、textrank等的bag-of-words；
+    * 主题模型：LSA（SVD）、pLSA、LDA；
+    * 基于词向量的固定表征：word2vec、fastText、glove
+    * 基于词向量的动态表征：ELMO、GPT、bert
+* 上面给出的4个类型也是nlp领域最为常用的文本表示了，文本是由每个单词构成的，而谈起词向量，one-hot是可认为是最为简单的词向量，但存在维度灾难和语义鸿沟等问题；通过构建共现矩阵并利用SVD求解构建词向量，则计算复杂度高；而早期词向量的研究通常来源于语言模型，比如NNLM和RNNLM，其主要目的是语言模型，而词向量只是一个副产物。
+### 使得Embedding流行的Word2Vec
+* [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/pdf/1301.3781). Google的Tomas Mikolov提出word2vec的两篇文章之一，这篇文章更具有综述性质，列举了NNLM、RNNLM等诸多词向量模型，但最重要的还是提出了CBOW和Skip-gram两种word2vec的模型结构。虽然词向量的研究早已有之，但不得不说还是Google的word2vec的提出让词向量重归主流，拉开了整个embedding技术发展的序幕。
+* [Distributed Representations of Words and Phrases and their Compositionality](https://arxiv.org/pdf/1310.4546) Tomas Mikolov的另一篇word2vec奠基性的文章。相比上一篇的综述，本文更详细的阐述了Skip-gram模型的细节，包括模型的具体形式和 Hierarchical Softmax和 Negative Sampling两种可行的训练方法。
+* [Word2vec Parameter Learning Explained](https://arxiv.org/pdf/1411.2738). 虽然Mikolov的两篇代表作标志的word2vec的诞生，但其中忽略了大量技术细节，如果希望完全读懂word2vec的原理和实现方法，比如词向量具体如何抽取，具体的训练过程等，强烈建议大家阅读UMich Xin Rong博士的这篇针对word2vec的解释性文章。
+    * Word2Vec算法原理：
+        * skip-gram: 用一个词语作为输入，来预测它周围的上下文
+        * cbow: 拿一个词语的上下文作为输入，来预测这个词语本身
+### Word Embedding 缺点
+* 多义词是自然语言中经常出现的现象，也是语言灵活性和高效性的一种体现。然而，Word Embedding针对多义词问题没有得到很好的解决。
+* 比如多义词Bank，有两个常用含义，但是Word Embedding在对bank这个单词进行编码的时候，是区分不开这两个含义的，因为它们尽管上下文环境中出现的单词不同，但是在用语言模型训练的时候，不论什么上下文的句子经过word2vec，都是预测相同的单词bank，而同一个单词占的是同一行的参数空间，这导致两种不同的上下文信息都会编码到相同的word embedding空间里去。所以word embedding无法区分多义词的不同语义，这就是它的一个比较严重的问题。
+
+## 演进和发展
+* word embedding得到的词向量是固定表征的，无法解决一词多义等问题，因此引入基于语言模型的动态表征方法：ELMO、GPT、bert，以ELMO为例：
+* 针对多义词问题，ELMO提供了一种简洁优雅的解决方案，ELMO是“Embedding from Language Models”的简称（论文：Deep contextualized word representation）。ELMO的本质思想是：事先用语言模型学好一个单词的Word Embedding，此时多义词无法区分，但在实际使用Word Embedding的时候，单词已经具备了特定的上下文了，这个时候可以根据上下文单词的语义去调整单词的Word Embedding表示，这样经过调整后的Word Embedding更能表达在这个上下文中的具体含义，自然也就解决了多义词的问题了。所以ELMO本身是个根据当前上下文对Word Embedding动态调整的思路。
+
+## Word2vec 的训练trick
+* Word2vec 本质上是一个语言模型，它的输出节点数是 V 个，对应了 V 个词语，本质上是一个多分类问题，但实际当中，词语的个数非常非常多，会给计算造成很大困难，所以需要用技巧来加速训练。
+* 为了更新输出向量的参数，我们需要先计算误差，然后通过反向传播更新参数。在计算误差是我们需要遍历词向量的所有维度，这相当于遍历了一遍单词表，碰到大型语料库时计算代价非常昂贵。要解决这个问题，有三种方式：
+* Hierarchical Softmax：通过 Hierarchical Softmax 将复杂度从 O(n) 降为 O(log n)；
+* Sub-Sampling Frequent Words：通过采样函数一定概率过滤高频单词；
+* Negative Sampling：直接通过采样的方式减少负样本。
+
+### Application
+* Word2vec 主要原理是根据上下文来预测单词，一个词的意义往往可以从其前后的句子中抽取出来。
+* 而用户的行为也是一种相似的时间序列，可以通过上下文进行推断。当用户浏览并与内容进行交互时，我们可以从用户前后的交互过程中判断行为的抽象特征，这就使得我们可以用词向量模型应用到推荐、广告领域当中。
+* Word2vec 已经应用于多个领域，并取得了巨大成功：
+* Airbnb 将用户的浏览行为组成 List，通过 Word2Vec 方法学习 item 的向量，其点击率提升了 21%，且带动了 99% 的预定转化率；
+* Yahoo 邮箱从发送到用户的购物凭证中抽取商品并组成 List，通过 Word2Vec 学习并为用户推荐潜在的商品；
+* 将用户的搜索查询和广告组成 List，并为其学习特征向量，以便对于给定的搜索查询可以匹配适合的广告。
+
+
 ### Large language model
 * GPT，全称Generative Pre-training Transformer，是OpenAI开发的一种基于Transformer的大规模自然语言生成模型。GPT模型采用了自监督学习的方式，首先在大量的无标签数据上进行预训练，然后在特定任务的数据上进行微调。
     * 在预训练（Pre-training）阶段，GPT模型使用了一个被称为“Masked Language Model”（MLM）的任务，要求预测一个句子中被遮盖住的部分。预训练的目标是最大化句子中每个位置的单词的条件概率，这个概率由模型生成的分布和真实单词的分布之间的交叉熵来计算。
@@ -73,5 +116,5 @@ math: true
 * 3、把相关的文档构建成提示的语境，基于相关内容进行QA，让chatglm等进行语境学习，用人话回答问题。
 
 ## Reference
-* [Transformer、GPT、ChatGPT、LLM、AIGC和LangChain的区别
-](https://zhuanlan.zhihu.com/p/647391226)
+* [Transformer、GPT、ChatGPT、LLM、AIGC和LangChain的区别](https://zhuanlan.zhihu.com/p/647391226)
+* [一文读懂NLP](https://zhuanlan.zhihu.com/p/384452959)
