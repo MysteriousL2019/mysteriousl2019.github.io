@@ -60,6 +60,8 @@ math: true
 * Yahoo 邮箱从发送到用户的购物凭证中抽取商品并组成 List，通过 Word2Vec 学习并为用户推荐潜在的商品；
 * 将用户的搜索查询和广告组成 List，并为其学习特征向量，以便对于给定的搜索查询可以匹配适合的广告。
 
+### 区别
+BERT模型与OpenAI GPT的区别就在于采用了Transformer Encoder，也就是每个时刻的Attention计算都能够得到全部时刻的输入，而OpenAI GPT采用了Transformer Decoder，每个时刻的Attention计算只能依赖于该时刻前的所有时刻的输入，因为OpenAI GPT是采用了单向语言模型。
 
 ### Large language model
 * GPT，全称Generative Pre-training Transformer，是OpenAI开发的一种基于Transformer的大规模自然语言生成模型。GPT模型采用了自监督学习的方式，首先在大量的无标签数据上进行预训练，然后在特定任务的数据上进行微调。
@@ -118,3 +120,4 @@ math: true
 ## Reference
 * [Transformer、GPT、ChatGPT、LLM、AIGC和LangChain的区别](https://zhuanlan.zhihu.com/p/647391226)
 * [一文读懂NLP](https://zhuanlan.zhihu.com/p/384452959)
+* [embedding的原理及实践](https://qiankunli.github.io/2022/03/02/embedding.html)
