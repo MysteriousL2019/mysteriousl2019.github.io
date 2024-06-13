@@ -302,3 +302,5 @@ We ask: what makes masked autoencoding different between vision and language ?
 * [PE](https://blog.csdn.net/weixin_44012382/article/details/113059423)
 * [Lost of Gradient RNN vs DNN](https://zhuanlan.zhihu.com/p/673787298)
 * [LSTM reduce lost of gradient](https://zhuanlan.zhihu.com/p/109519044)
+
+* [Bert 理论](https://blog.csdn.net/yjw123456/article/details/120211601)
