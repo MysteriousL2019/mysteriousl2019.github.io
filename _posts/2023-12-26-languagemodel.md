@@ -149,3 +149,5 @@ BERT模型与OpenAI GPT的区别就在于采用了Transformer Encoder，也就�
 * [embedding的原理及实践](https://qiankunli.github.io/2022/03/02/embedding.html)
 * [大模型微调embedding](https://blog.csdn.net/asd8705/article/details/135586686)
 * [Prompt工程还是SFT微调？剖析企业应用中优化大语言模型输出的两种方案](https://developer.volcengine.com/articles/7370375425945993226)
+* [揭秘SentenceTransformer: cross-encoder和重排](https://www.cnblogs.com/huggingface/p/18010292)
+* [sentence Transformer 的两个组件妙用](https://blog.csdn.net/asd8705/article/details/135581911)
