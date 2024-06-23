@@ -22,6 +22,7 @@ math: true
 ### 1. 理解Embedding模型
 * 首先，我们要了解Embedding模型是如何工作的。在Embedding层中，每个离散型数据都被映射到一个低维向量空间。这个向量空间能够捕捉到数据之间的语义和相关性，使得相似的数据在向量空间中彼此靠近。通过训练，Embedding模型可以学习到数据的有效表示，从而提高模型的性能。
 ### 2. 微调Embedding模型
+* [微调embedding方法](https://insight.xiaoduoai.com/intelligent-frontiers/tech/improving-rag-performance-by-fine-tuning-the-embedding-model.html)对比学习
 * 微调（Fine-tuning）是指对已经训练好的模型进行进一步的训练，以适应特定的任务或数据集。对于Embedding模型来说，微调意味着对已经学习到的向量表示进行调整，以提高模型在目标数据集上的性能。
 * 在微调过程中，我们通常会对Embedding层的参数进行更新。这可以通过反向传播算法和梯度下降等优化方法来实现。通过调整这些参数，我们可以让模型更好地适应目标数据集，从而提高召回效果。
 ### 3. 实战技巧：提升召回效果
