@@ -43,7 +43,7 @@ OpenAI O 系列发布之后，Inference Time Scaling 的模型一直备受关注
 Qwen3 的整体训练流程如下图所示：
 
 ![](https://pic2.zhimg.com/v2-392f4d4896fa0e9af904d93c5f4ee087_1440w.jpg)
-
+ 
 
 一共有四个阶段，其中思考混合模式（Thinking Mode Fusion）位于第三个阶段，其实也就是对应着 [Supervised Fine-Tuning](https://zhida.zhihu.com/search?content_id=258172295&content_type=Article&match_order=1&q=Supervised+Fine-Tuning&zhida_source=entity)（SFT）阶段。因此很显然 Qwen3 混合思考的能力主要来源于 SFT，这也是区别于另外两篇文章的地方。
 
