@@ -14,7 +14,7 @@ math: true
 # Gemini 2.5 Pro 是怎么炼成的？-- gemini 2.5 技术报告阅读笔记与思考
 
 ## **1\. 收获（takeaway）**
-
+ 
 Gemini 的技术报告透露的细节非常的少，但是从行文来看，Gemini 2.5 Pro 成功的点主要有三个
 
 -   [多模态](https://zhida.zhihu.com/search?content_id=260291470&content_type=Article&match_order=1&q=%E5%A4%9A%E6%A8%A1%E6%80%81&zhida_source=entity)，其他的模型多模态能力或多或少都有所欠缺，只有 Gemini 2.5 这种模型才能有长视频的理解能力。
