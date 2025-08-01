@@ -52,7 +52,7 @@ Qwen3 的整体训练流程如下图所示：
 ### **2.1 训练**
 
 ### **2.1.1 （主）SFT 数据构造**
-
+ 
 构造一个混合思考的 system template，如下所示
 
 ![](https://picx.zhimg.com/v2-b5e9111193a4fa2eddb4b758f277e335_1440w.jpg)
